@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
         printf("too many arguments");
         return 1;
     }
+    printf("hi");
     parseFile(argv[1]);
     return 1;
 
@@ -23,6 +24,8 @@ int parseFile(char* filename)
     FILE *fp = fopen(filename, "r");
     char line[MAX_LENGTH];
     int dim, trainingNumber;
+    Vector *newVector = NULL;
+    Vector *trainingVector = NULL;
 
     fgets(line, MAX_LENGTH, fp);
     strtok(line, "\n");
@@ -34,7 +37,7 @@ int parseFile(char* filename)
     for (int i = 0; i < trainingNumber; i++)
     {
             fgets(line, MAX_LENGTH, fp);
-            parseLine(line);
+            parseLine(line, dim, newVector, trainingVector);
     }
 
     return 1;
@@ -42,47 +45,66 @@ int parseFile(char* filename)
 
 }
 
-int parseLine(char* line, int dimension)
+int parseLine(char* line, int dimension, Vector *newVector, Vector *trainingVector)
 {
-    vector trainingVector;
+    const char COMMA[2] = ",";
+    char *token;
+
+    for (int i = 0; i < dimension; i++)
+    {
+        token = strtok(line, COMMA);
+        newVector->coordinates[i] = atoi(token);
+        printf("vector coordinate %d is %s", i+1, token);
+    }
+    token = strtok(line, COMMA);
+    newVector->id = atoi(token);
+    return 1;
+
 }
 
 
 
-double* scalarTimesVector(double scalar, double* vector)
+Vector* scalarTimesVector(double scalar, Vector* vector)
 {
     int i = 0;
-    double* prod= NULL;
-    while (vector[i] != '\0')
+    while (vector->coordinates[i] != '\0')
     {
-        prod[i] = vector[i] * scalar;
+        vector->coordinates[i] = vector->coordinates[i] * scalar;
         i++;
     }
-    return prod;
+    return vector;
 }
 
-double innerProduct(double* vector1, double* vector2)
+double innerProduct(Vector* vector1, Vector* vector2)
 {
     int i = 0;
     double prod = 0;
 
-    while (vector1[i] != '\0')
+    while (vector1->coordinates[i] != '\0')
     {
-        prod = prod + (vector1[i]*vector2[i]);
+        prod = prod + (vector1->coordinates[i]*vector2->coordinates[i]);
         i++;
     }
     return prod;
 }
 
-double* sumVector(double* vector1, double* vector2)
+int checkVector(Vector* vector, Vector* trainingVector)
+{
+    if (innerProduct(vector, trainingVector) > MIN_VALUE)
+    {
+        return TAGGED;
+    }
+    return UNTAGGED;
+}
+
+Vector* sumVector(Vector* vector1, Vector* vector2)
 {
     int i = 0;
-    double* result = NULL;
 
-    while (vector1[i] != '\0')
+    while (vector1->coordinates[i] != '\0')
     {
-        result[i] = vector1[i] + vector2[i];
+        vector1->coordinates[i] = vector1->coordinates[i] + vector2->coordinates[i];
         i++;
     }
-    return result;
+    return vector1;
 }
